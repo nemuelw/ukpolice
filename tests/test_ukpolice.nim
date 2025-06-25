@@ -50,3 +50,7 @@ test "get_crimes_by_location_id(location_id, date)":
 test "get_crimes_by_coords(lat, lng, date)":
   let crimes = get_crimes_by_coords("52.629729", "-1.131592", "2024-01")
   check crimes.len == 2
+
+test "get_crimes_with_no_location(force, category, date)":
+  let crimes = get_crimes_with_no_location("leicestershire", "burglary", "2024-01")
+  check crimes.len == 19

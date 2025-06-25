@@ -156,7 +156,7 @@ proc get_street_crime_outcomes_by_location_id*(location_id: string, date: string
   get_street_crime_outcomes(url)
 
 proc get_street_crime_outcomes_by_coords*(lat, lng: string, date: string = ""): seq[CrimeOutcome] =
-  var url = BaseUrl & "ou_by_locatcomes-at-location?lat=" & lat & "&lng=" & lng
+  var url = BaseUrl & "outcomes-at-location?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
   get_street_crime_outcomes(url)
@@ -184,8 +184,13 @@ proc get_crimes_by_coords*(lat, lng: string, date: string = ""): seq[CrimeRecord
     url &= "&date=" & date
   get_crimes_at_location(url)
 
+proc get_crimes_with_no_location*(force: string, category = "all-crime", date = ""): seq[CrimeRecord] =
+  var url = BaseUrl & "crimes-no-location?category=" & category & "&force=" & force
+  if date != "":
+    url &= "&date=" & date
+  let resp = client.getContent(url)
+  resp.fromJson(seq[CrimeRecord])
+
 proc get_crime_categories*(date: string): seq[CrimeCategory] =
   let resp = client.getContent(BaseUrl & "crime-categories" & "?date=" & date)
   resp.fromJson(seq[CrimeCategory])
-
-
