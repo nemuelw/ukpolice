@@ -67,3 +67,8 @@ test "get_outcomes_for_crime(crime_id)":
 test "get_neighbourhoods_for_force(force_id)":
   let neighbourhoods = get_neighbourhoods_for_force("leicestershire")
   check neighbourhoods.len == 67
+
+test "get_neighbourhood_details(force_id, neighbourhood_id)":
+  let details = get_neighbourhood_details("leicestershire", "NC04")
+  check details.id == "NC04"
+  check details.name == "City Centre"

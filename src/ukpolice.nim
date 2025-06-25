@@ -115,6 +115,37 @@ type
     id*: string
     name*: string
 
+  Link* = object
+    url*: string
+    description*: string
+    title*: string
+
+  Centre* = object
+    latitude*: string
+    longitude*: string
+
+  Location* = object
+    name*: string
+    latitude*: string
+    longitude*: string
+    postcode*: string
+    address*: string
+    telephone*: string
+    location_type*: string
+    description*: string
+
+  NeighbourhoodDetails* = object
+    id*: string
+    description*: string
+    url_force*: string
+    contact_details*: ContactDetails
+    name*: string
+    welcome_message*: string
+    links*: seq[Link]
+    centre*: Centre
+    population*: string
+    locations*: seq[Location]
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -124,6 +155,9 @@ proc renameHook(e: var EngagementMethod, fieldName: var string) =
 proc renameHook(e: var ContactDetails, fieldName: var string) =
   if fieldName == "google-plus": fieldName = "google_plus"
   if fieldName == "e-messaging": fieldName = "e_messaging"
+
+proc renameHook(l: var Location, fieldName: var string) =
+  if fieldName == "type": fieldName = "location_type"
 
 let client = newHttpClient()
 client.headers["User-Agent"] = "ukpolice/0.1.0 (Nim)"
@@ -222,3 +256,7 @@ proc get_outcomes_for_crime*(crime_id: string): CrimeOutcomes =
 proc get_neighbourhoods_for_force*(force_id: string): seq[Neighbourhood] =
   let resp = client.getContent(BaseUrl & force_id & "/neighbourhoods")
   resp.fromJson(seq[Neighbourhood])
+
+proc get_neighbourhood_details*(force_id: string, neighbourhood_id: string): NeighbourhoodDetails =
+  let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id)
+  resp.fromJson(NeighbourhoodDetails)
