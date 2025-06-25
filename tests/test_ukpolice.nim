@@ -113,3 +113,7 @@ test "get_stops_and_searches_by_location_id(location_id, date)":
 test "get_stops_and_searches_with_no_location(force_id, date)":
   let stops_and_searches = get_stops_and_searches_with_no_location("leicestershire", "2024-01")
   check stops_and_searches.len == 33
+
+test "get_stops_and_searches_by_force(force_id, date)":
+  let stops_and_searches = get_stops_and_searches_by_force("leicestershire", "2024-01")
+  check stops_and_searches.len > 0

@@ -416,3 +416,9 @@ proc get_stops_and_searches_with_no_location*(force_id: string, date = ""): seq[
   if date != "":
     url &= "&date=" & date
   get_stops_and_searches(url)
+
+proc get_stops_and_searches_by_force*(force_id: string, date = ""): seq[StopAndSearch] =
+  var url = BaseUrl & "stops-force?force=" & force_id
+  if date != "":
+    url &= "&date=" & date
+  get_stops_and_searches(url)
