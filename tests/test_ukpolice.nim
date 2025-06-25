@@ -24,11 +24,12 @@ test "get_crime_categories(date)":
   check crime_categories.len == 15
 
 test "get_street_crimes_by_coords(lat, lng, category, date)":
-  let crimes = get_street_crimes_by_coords("51", "-1.423", date="2024-01")
+  let crimes = get_street_crimes_by_coords("51", "-1.423", date = "2024-01")
   check crimes.len == 2
 
 test "get_street_crimes_by_polygon(poly, category, date)":
-  let crimes = get_street_crimes_by_polygon(@[("52","0.5"),("52.794","0.4"),("52.1","0.5")], date="2024-01")
+  let crimes = get_street_crimes_by_polygon(@[("52", "0.5"), ("52.794", "0.4"),
+      ("52.1", "0.5")], date = "2024-01")
   check crimes.len == 10
 
 test "get_street_crime_outcomes_by_location_id(location_id, date)":
@@ -41,7 +42,7 @@ test "get_street_crime_outcomes_by_coords(lat, lng, date)":
 
 test "get_street_crime_outcomes_by_polygon(poly, date)":
   let outcomes = get_street_crime_outcomes_by_polygon(
-    @[("52","0.5"),("52.794","0.4"),("52.1","0.5")], date="2024-01")
+    @[("52", "0.5"), ("52.794", "0.4"), ("52.1", "0.5")], date = "2024-01")
   check outcomes.len == 9
 
 test "get_crimes_by_location_id(location_id, date)":
@@ -98,12 +99,13 @@ test "get_policing_team_for_area(lat, lng)":
   check team.neighbourhood == "E05013806N"
 
 test "get_street_stops_and_searches_by_coords(lat, lng, date)":
-  let stops_and_searches = get_street_stops_and_searches_by_coords("52.001", "-1.001", "2024-01")
+  let stops_and_searches = get_street_stops_and_searches_by_coords("52.001",
+      "-1.001", "2024-01")
   check stops_and_searches.len == 2
 
 test "get_street_stops_and_searches_by_polygon(poly, date)":
   let stops_and_searches = get_street_stops_and_searches_by_polygon(
-    @[("52","0.5"),("52.794","0.4"),("52.1","0.5")], "2024-01")
+    @[("52", "0.5"), ("52.794", "0.4"), ("52.1", "0.5")], "2024-01")
   check stops_and_searches.len == 3
 
 test "get_stops_and_searches_by_location_id(location_id, date)":
@@ -111,7 +113,8 @@ test "get_stops_and_searches_by_location_id(location_id, date)":
   check stops_and_searches.len == 2
 
 test "get_stops_and_searches_with_no_location(force_id, date)":
-  let stops_and_searches = get_stops_and_searches_with_no_location("leicestershire", "2024-01")
+  let stops_and_searches = get_stops_and_searches_with_no_location(
+      "leicestershire", "2024-01")
   check stops_and_searches.len == 33
 
 test "get_stops_and_searches_by_force(force_id, date)":

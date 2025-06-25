@@ -220,7 +220,8 @@ proc parseHook(s: string, i: var int, v: var StopAndSearch) =
   v.involved_person = raw["involved_person"].bval
   v.datetime = raw["datetime"].str
   v.operation = if "operation" in raw: raw["operation"].getStr else: ""
-  v.operation_name = if "operation_name" in raw: raw["operation_name"].getStr else: ""
+  v.operation_name = if "operation_name" in raw: raw[
+      "operation_name"].getStr else: ""
   v.gender = raw["gender"].getStr
   v.age_range = raw["age_range"].getStr
   v.self_defined_ethnicity = raw["self_defined_ethnicity"].getStr
@@ -251,7 +252,8 @@ proc parseHook(s: string, i: var int, v: var StopAndSearch) =
 
   case raw["outcome_linked_to_object_of_search"].kind:
   of JBool:
-    v.outcome_linked_to_object_of_search = some(raw["outcome_linked_to_object_of_search"].bval)
+    v.outcome_linked_to_object_of_search = some(raw[
+        "outcome_linked_to_object_of_search"].bval)
   of JNull:
     v.outcome_linked_to_object_of_search = none(bool)
   else:
@@ -259,7 +261,8 @@ proc parseHook(s: string, i: var int, v: var StopAndSearch) =
 
   case raw["removal_of_more_than_outer_clothing"].kind:
   of JBool:
-    v.removal_of_more_than_outer_clothing = some(raw["removal_of_more_than_outer_clothing"].bval)
+    v.removal_of_more_than_outer_clothing = some(raw[
+        "removal_of_more_than_outer_clothing"].bval)
   of JNull:
     v.removal_of_more_than_outer_clothing = none(bool)
   else:
@@ -288,13 +291,15 @@ proc get_street_crimes(url: string): seq[CrimeRecord] =
   let resp = client.getContent(url)
   resp.fromJson(seq[CrimeRecord])
 
-proc get_street_crimes_by_coords*(lat, lng: string, category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
+proc get_street_crimes_by_coords*(lat, lng: string,
+    category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
   var url = BaseUrl & "crimes-street/" & category & "?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
   get_street_crimes(url)
 
-proc get_street_crimes_by_polygon*(poly: seq[(string, string)], category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
+proc get_street_crimes_by_polygon*(poly: seq[(string, string)],
+    category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
   let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
   var url = BaseUrl & "crimes-street/all-crime?poly=" & polyParam
   if date != "":
@@ -305,19 +310,22 @@ proc get_street_crime_outcomes(url: string): seq[CrimeOutcomeRecord] =
   let resp = client.getContent(url)
   resp.fromJson(seq[CrimeOutcomeRecord])
 
-proc get_street_crime_outcomes_by_location_id*(location_id: string, date = ""): seq[CrimeOutcomeRecord] =
+proc get_street_crime_outcomes_by_location_id*(location_id: string,
+    date = ""): seq[CrimeOutcomeRecord] =
   var url = BaseUrl & "outcomes-at-location?location_id=" & location_id
   if date != "":
     url &= "&date=" & date
   get_street_crime_outcomes(url)
 
-proc get_street_crime_outcomes_by_coords*(lat, lng: string, date = ""): seq[CrimeOutcomeRecord] =
+proc get_street_crime_outcomes_by_coords*(lat, lng: string, date = ""): seq[
+    CrimeOutcomeRecord] =
   var url = BaseUrl & "outcomes-at-location?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
   get_street_crime_outcomes(url)
 
-proc get_street_crime_outcomes_by_polygon*(poly: seq[(string, string)], date = ""): seq[CrimeOutcomeRecord] =
+proc get_street_crime_outcomes_by_polygon*(poly: seq[(string, string)],
+    date = ""): seq[CrimeOutcomeRecord] =
   let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
   var url = BaseUrl & "outcomes-at-location?poly=" & polyParam
   if date != "":
@@ -340,7 +348,8 @@ proc get_crimes_by_coords*(lat, lng: string, date: string = ""): seq[CrimeRecord
     url &= "&date=" & date
   get_crimes_at_location(url)
 
-proc get_crimes_with_no_location*(force: string, category = "all-crime", date = ""): seq[CrimeRecord] =
+proc get_crimes_with_no_location*(force: string, category = "all-crime",
+    date = ""): seq[CrimeRecord] =
   var url = BaseUrl & "crimes-no-location?category=" & category & "&force=" & force
   if date != "":
     url &= "&date=" & date
@@ -363,11 +372,13 @@ proc get_neighbourhoods_for_force*(force_id: string): seq[Neighbourhood] =
   let resp = client.getContent(BaseUrl & force_id & "/neighbourhoods")
   resp.fromJson(seq[Neighbourhood])
 
-proc get_neighbourhood_details*(force_id: string, neighbourhood_id: string): NeighbourhoodDetails =
+proc get_neighbourhood_details*(force_id: string,
+    neighbourhood_id: string): NeighbourhoodDetails =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id)
   resp.fromJson(NeighbourhoodDetails)
 
-proc get_neighbourhood_boundary*(force_id: string, neighbourhood_id: string): seq[Coords] =
+proc get_neighbourhood_boundary*(force_id: string,
+    neighbourhood_id: string): seq[Coords] =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/boundary")
   resp.fromJson(seq[Coords])
 
@@ -379,7 +390,8 @@ proc get_neighbourhood_events*(force_id: string, neighbourhood_id: string): seq[
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/events")
   resp.fromJson(seq[Event])
 
-proc get_neighbourhood_priorities*(force_id: string, neighbourhood_id: string): seq[Priority] =
+proc get_neighbourhood_priorities*(force_id: string,
+    neighbourhood_id: string): seq[Priority] =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/priorities")
   resp.fromJson(seq[Priority])
 
@@ -392,32 +404,37 @@ proc get_stops_and_searches(url: string): seq[StopAndSearch] =
   let resp = client.getContent(url)
   resp.fromJson(seq[StopAndSearch])
 
-proc get_street_stops_and_searches_by_coords*(lat, lng: string, date = ""): seq[StopAndSearch] =
+proc get_street_stops_and_searches_by_coords*(lat, lng: string, date = ""): seq[
+    StopAndSearch] =
   var url = BaseUrl & "stops-street?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
   get_stops_and_searches(url)
 
-proc get_street_stops_and_searches_by_polygon*(poly: seq[(string, string)], date = ""): seq[StopAndSearch] =
+proc get_street_stops_and_searches_by_polygon*(poly: seq[(string, string)],
+    date = ""): seq[StopAndSearch] =
   let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
   var url = BaseUrl & "stops-street?poly=" & polyParam
   if date != "":
     url &= "&date=" & date
   get_stops_and_searches(url)
 
-proc get_stops_and_searches_by_location_id*(location_id: string, date: string = ""): seq[StopAndSearch] =
+proc get_stops_and_searches_by_location_id*(location_id: string,
+    date: string = ""): seq[StopAndSearch] =
   var url = BaseUrl & "stops-at-location?location_id=" & location_id
   if date != "":
     url &= "&date=" & date
   get_stops_and_searches(url)
 
-proc get_stops_and_searches_with_no_location*(force_id: string, date = ""): seq[StopAndSearch] =
+proc get_stops_and_searches_with_no_location*(force_id: string, date = ""): seq[
+    StopAndSearch] =
   var url = BaseUrl & "stops-no-location?force=" & force_id
   if date != "":
     url &= "&date=" & date
   get_stops_and_searches(url)
 
-proc get_stops_and_searches_by_force*(force_id: string, date = ""): seq[StopAndSearch] =
+proc get_stops_and_searches_by_force*(force_id: string, date = ""): seq[
+    StopAndSearch] =
   var url = BaseUrl & "stops-force?force=" & force_id
   if date != "":
     url &= "&date=" & date
