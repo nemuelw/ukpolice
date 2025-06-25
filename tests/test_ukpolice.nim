@@ -58,3 +58,8 @@ test "get_crimes_with_no_location(force, category, date)":
 test "get_crime_last_updated()":
   let last_updated = get_crime_last_updated()
   check last_updated.date.len > 0
+
+test "get_outcomes_for_crime(crime_id)":
+  let crime_id = "e11dade0a92a912d12329b9b2abb856ac9520434ad6845c30f503e9901d140f1"
+  let crime_outcomes = get_outcomes_for_crime(crime_id)
+  check crime_outcomes.crime.persistent_id == crime_id
