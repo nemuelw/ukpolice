@@ -14,3 +14,7 @@ test "get_force_details(force_id) returns correct force details":
   check details.id == "leicestershire"
   check details.name == "Leicestershire Police"
   check details.telephone == "101"
+
+test "get_senior_officers(force_id) returns correct senior officers' details":
+  let senior_officers = get_senior_officers("leicestershire")
+  check senior_officers.len > 0
