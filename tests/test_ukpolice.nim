@@ -78,3 +78,7 @@ test "get_neighbourhood_boundary(force_id, neighbourhood_id)":
   check boundary.len == 85
   check boundary[0].latitude == "52.6394052587"
   check boundary[0].longitude == "-1.1458618876"
+
+test "get_neighbourhood_team(force_id, neighbourhood_id)":
+  let team = get_neighbourhood_team("leicestershire", "NC04")
+  check team.len > 0

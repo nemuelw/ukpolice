@@ -45,7 +45,7 @@ type
     blog*: string
     rss*: string
 
-  SeniorOfficer* = object
+  Officer* = object
     name*: string
     rank*: string
     bio*: string
@@ -178,9 +178,9 @@ proc get_force_details*(force_id: string): ForceDetails =
   let resp = client.getContent(BaseUrl & "forces" & "/" & force_id)
   resp.fromJson(ForceDetails)
 
-proc get_senior_officers*(force_id: string): seq[SeniorOfficer] =
+proc get_senior_officers*(force_id: string): seq[Officer] =
   let resp = client.getContent(BaseUrl & "forces" & "/" & force_id & "/people")
-  resp.fromJson(seq[SeniorOfficer])
+  resp.fromJson(seq[Officer])
 
 proc get_street_crimes(url: string): seq[CrimeRecord] =
   let resp = client.getContent(url)
@@ -268,3 +268,7 @@ proc get_neighbourhood_details*(force_id: string, neighbourhood_id: string): Nei
 proc get_neighbourhood_boundary*(force_id: string, neighbourhood_id: string): seq[Coords] =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/boundary")
   resp.fromJson(seq[Coords])
+
+proc get_neighbourhood_team*(force_id: string, neighbourhood_id: string): seq[Officer] =
+  let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/people")
+  resp.fromJson(seq[Officer])
