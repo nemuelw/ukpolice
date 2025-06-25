@@ -63,3 +63,7 @@ test "get_outcomes_for_crime(crime_id)":
   let crime_id = "e11dade0a92a912d12329b9b2abb856ac9520434ad6845c30f503e9901d140f1"
   let crime_outcomes = get_outcomes_for_crime(crime_id)
   check crime_outcomes.crime.persistent_id == crime_id
+
+test "get_neighbourhoods_for_force(force_id)":
+  let neighbourhoods = get_neighbourhoods_for_force("leicestershire")
+  check neighbourhoods.len == 67

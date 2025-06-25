@@ -111,6 +111,10 @@ type
     crime*: Crime
     outcomes*: seq[CrimeOutcome]
 
+  Neighbourhood* = object
+    id*: string
+    name*: string
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -214,3 +218,7 @@ proc get_crime_last_updated*(): LastUpdated =
 proc get_outcomes_for_crime*(crime_id: string): CrimeOutcomes =
   let resp = client.getContent(BaseUrl & "outcomes-for-crime/" & crime_id)
   resp.fromJson(CrimeOutcomes)
+
+proc get_neighbourhoods_for_force*(force_id: string): seq[Neighbourhood] =
+  let resp = client.getContent(BaseUrl & force_id & "/neighbourhoods")
+  resp.fromJson(seq[Neighbourhood])
