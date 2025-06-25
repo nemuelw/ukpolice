@@ -159,6 +159,12 @@ type
     start_date*: string
     end_date*: string
 
+  Priority* = object
+    issue*: string
+    issue_date*: string
+    action*: string
+    action_date*: string
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -174,6 +180,10 @@ proc renameHook(l: var Location, fieldName: var string) =
 
 proc renameHook(e: var Event, fieldName: var string) =
   if fieldName == "type": fieldName = "event_type"
+
+proc renameHook(p: var Priority, fieldName: var string) =
+  if fieldName == "issue-date": fieldName = "issue_date"
+  if fieldName == "action-date": fieldName = "action_date"
 
 let client = newHttpClient()
 client.headers["User-Agent"] = "ukpolice/0.1.0 (Nim)"
@@ -288,3 +298,7 @@ proc get_neighbourhood_team*(force_id: string, neighbourhood_id: string): seq[Of
 proc get_neighbourhood_events*(force_id: string, neighbourhood_id: string): seq[Event] =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/events")
   resp.fromJson(seq[Event])
+
+proc get_neighbourhood_priorities*(force_id: string, neighbourhood_id: string): seq[Priority] =
+  let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/priorities")
+  resp.fromJson(seq[Priority])

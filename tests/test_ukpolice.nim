@@ -86,3 +86,7 @@ test "get_neighbourhood_team(force_id, neighbourhood_id)":
 test "get_neighbourhood_events(force_id, neighbourhood_id)":
   let events = get_neighbourhood_events("leicestershire", "NC04")
   check events.len >= 0
+
+test "get_neighbourhood_priorities(force_id, neighbourhood_id)":
+  let priorities = get_neighbourhood_priorities("leicestershire", "NC04")
+  check priorities.len >= 0
