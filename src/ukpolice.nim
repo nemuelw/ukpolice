@@ -146,6 +146,10 @@ type
     population*: string
     locations*: seq[Location]
 
+  Coords* = object
+    latitude*: string
+    longitude*: string
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -260,3 +264,7 @@ proc get_neighbourhoods_for_force*(force_id: string): seq[Neighbourhood] =
 proc get_neighbourhood_details*(force_id: string, neighbourhood_id: string): NeighbourhoodDetails =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id)
   resp.fromJson(NeighbourhoodDetails)
+
+proc get_neighbourhood_boundary*(force_id: string, neighbourhood_id: string): seq[Coords] =
+  let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/boundary")
+  resp.fromJson(seq[Coords])

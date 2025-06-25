@@ -72,3 +72,9 @@ test "get_neighbourhood_details(force_id, neighbourhood_id)":
   let details = get_neighbourhood_details("leicestershire", "NC04")
   check details.id == "NC04"
   check details.name == "City Centre"
+
+test "get_neighbourhood_boundary(force_id, neighbourhood_id)":
+  let boundary = get_neighbourhood_boundary("leicestershire", "NC04")
+  check boundary.len == 85
+  check boundary[0].latitude == "52.6394052587"
+  check boundary[0].longitude == "-1.1458618876"
