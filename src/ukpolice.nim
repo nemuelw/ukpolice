@@ -79,6 +79,26 @@ type
     location_type*: string
     outcome_status*: CrimeOutcomeStatus
 
+  CrimeOutcomeCategory* = object
+    code*: string
+    name*: string
+
+  Crime* = object
+    category*: string
+    id*: int
+    persistent_id*: string
+    location_type*: string
+    location_subtype*: string
+    location*: CrimeLocation
+    context*: string
+    month*: string
+
+  CrimeOutcome* = object
+    category*: CrimeOutcomeCategory
+    date*: string
+    person_id*: string
+    crime*: Crime
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -119,11 +139,34 @@ proc get_street_crimes_by_location*(lat, lng: string, category: string = "all-cr
   get_street_crimes(url)
 
 proc get_street_crimes_by_polygon*(poly: seq[(string, string)], category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
-  var polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
+  let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
   var url = BaseUrl & "crimes-street/all-crime?poly=" & polyParam
   if date != "":
     url &= "&date=" & date
   get_street_crimes(url)
+
+proc get_street_crime_outcomes(url: string): seq[CrimeOutcome] =
+  let resp = client.getContent(url)
+  resp.fromJson(seq[CrimeOutcome])
+
+proc get_street_crime_outcomes_by_location_id*(location_id: string, date: string = ""): seq[CrimeOutcome] =
+  var url = BaseUrl & "outcomes-at-location?" & "location_id=" & location_id
+  if date != "":
+    url &= "&date=" & date
+  get_street_crime_outcomes(url)
+
+proc get_street_crime_outcomes_by_location*(lat, lng: string, date: string = ""): seq[CrimeOutcome] =
+  var url = BaseUrl & "outcomes-at-location?lat=" & lat & "&lng=" & lng
+  if date != "":
+    url &= "&date=" & date
+  get_street_crime_outcomes(url)
+
+proc get_street_crime_outcomes_by_polygon*(poly: seq[(string, string)], date: string = ""): seq[CrimeOutcome] =
+  let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
+  var url = BaseUrl & "outcomes-at-location?poly=" & polyParam
+  if date != "":
+    url &= "&date=" & date
+  get_street_crime_outcomes(url)
 
 proc get_crime_categories*(date: string): seq[CrimeCategory] =
   let resp = client.getContent(BaseUrl & "crime-categories" & "?date=" & date)

@@ -30,3 +30,15 @@ test "get_street_crimes_by_location(lat, lng, category, date)":
 test "get_street_crimes_by_polygon(poly, category, date)":
   let crimes = get_street_crimes_by_polygon(@[("52","0.5"),("52.794","0.4"),("52.1","0.5")], date="2024-01")
   check crimes.len == 10
+
+test "get_street_crime_outcomes_by_location_id(location_id, date)":
+  let outcomes = get_street_crime_outcomes_by_location_id("1737432", "2024-01")
+  check outcomes.len == 3
+
+test "get_street_crime_outcomes_by_location(lat, lng, date)":
+  let outcomes = get_street_crime_outcomes_by_location("51", "-1.423", "2024-01")
+  check outcomes.len == 4
+
+test "get_street_crime_outcomes_by_polygon(poly, date)":
+  let outcomes = get_street_crime_outcomes_by_polygon(@[("52","0.5"),("52.794","0.4"),("52.1","0.5")], date="2024-01")
+  check outcomes.len == 9
