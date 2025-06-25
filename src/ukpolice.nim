@@ -1,4 +1,4 @@
-import httpclient, sequtils, strutils
+import httpclient, json, options, sequtils, strutils
 import jsony
 
 const BaseUrl = "https://data.police.uk/api/"
@@ -55,13 +55,13 @@ type
     url*: string
     name*: string
 
-  CrimeStreet* = object
+  Street* = object
     id*: int
     name*: string
 
-  CrimeLocation* = object
+  Location* = object
     latitude*: string
-    street*: CrimeStreet
+    street*: Street
     longitude*: string
 
   CrimeOutcomeStatus* = object
@@ -73,7 +73,7 @@ type
     persistent_id*: string
     location_subtype*: string
     id*: int
-    location*: CrimeLocation
+    location*: Location
     context*: string
     month*: string
     location_type*: string
@@ -89,7 +89,7 @@ type
     persistent_id*: string
     location_type*: string
     location_subtype*: string
-    location*: CrimeLocation
+    location*: Location
     context*: string
     month*: string
 
@@ -124,7 +124,7 @@ type
     latitude*: string
     longitude*: string
 
-  Location* = object
+  NeighbourhoodLocation* = object
     name*: string
     latitude*: string
     longitude*: string
@@ -144,7 +144,7 @@ type
     links*: seq[Link]
     centre*: Centre
     population*: string
-    locations*: seq[Location]
+    locations*: seq[NeighbourhoodLocation]
 
   Coords* = object
     latitude*: string
@@ -169,6 +169,28 @@ type
     force*: string
     neighbourhood*: string
 
+  OutcomeObject* = object
+    id*: string
+    name*: string
+
+  StopAndSearch* = object
+    stop_and_search_type*: string
+    involved_person*: bool
+    datetime*: string
+    operation*: string
+    operation_name*: string
+    location*: Location
+    gender*: string
+    age_range*: string
+    self_defined_ethnicity*: string
+    officer_defined_ethnicity*: string
+    legislation*: string
+    object_of_search*: string
+    outcome_object*: OutcomeObject
+    outcome*: string
+    outcome_linked_to_object_of_search*: Option[bool]
+    removal_of_more_than_outer_clothing*: Option[bool]
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -179,7 +201,7 @@ proc renameHook(e: var ContactDetails, fieldName: var string) =
   if fieldName == "google-plus": fieldName = "google_plus"
   if fieldName == "e-messaging": fieldName = "e_messaging"
 
-proc renameHook(l: var Location, fieldName: var string) =
+proc renameHook(l: var NeighbourhoodLocation, fieldName: var string) =
   if fieldName == "type": fieldName = "location_type"
 
 proc renameHook(e: var Event, fieldName: var string) =
@@ -188,6 +210,57 @@ proc renameHook(e: var Event, fieldName: var string) =
 proc renameHook(p: var Priority, fieldName: var string) =
   if fieldName == "issue-date": fieldName = "issue_date"
   if fieldName == "action-date": fieldName = "action_date"
+
+proc parseHook(s: string, i: var int, v: var StopAndSearch) =
+  var raw: JsonNode
+  parseHook(s, i, raw)
+
+  # Parse all fields manually
+  v.stop_and_search_type = raw["type"].str
+  v.involved_person = raw["involved_person"].bval
+  v.datetime = raw["datetime"].str
+  v.operation = if "operation" in raw: raw["operation"].getStr else: ""
+  v.operation_name = if "operation_name" in raw: raw["operation_name"].getStr else: ""
+  v.location = raw["location"].to(Location)
+  v.gender = raw["gender"].getStr
+  v.age_range = raw["age_range"].getStr
+  v.self_defined_ethnicity = raw["self_defined_ethnicity"].getStr
+  v.officer_defined_ethnicity = raw["officer_defined_ethnicity"].getStr
+  v.legislation = raw["legislation"].getStr
+  v.object_of_search = raw["object_of_search"].getStr
+  v.outcome_object = raw["outcome_object"].to(OutcomeObject)
+
+  # Custom outcome field parsing
+  if "outcome" in raw:
+    let outcomeNode = raw["outcome"]
+    case outcomeNode.kind
+    of JBool:
+      if outcomeNode.bval:
+        v.outcome = "true"
+      else:
+        v.outcome = "false"
+    of JString:
+      v.outcome = outcomeNode.str
+    else:
+      raise newException(ValueError, "invalid type for 'outcome' field")
+
+  if "outcome_linked_to_object_of_search" in raw:
+    case raw["outcome_linked_to_object_of_search"].kind:
+    of JBool:
+      v.outcome_linked_to_object_of_search = some(raw["outcome_linked_to_object_of_search"].bval)
+    of JNull:
+      v.outcome_linked_to_object_of_search = none(bool)
+    else:
+      raise newException(ValueError, "invalid type for 'outcome_linked_to_object_of_search' field")
+
+  if "removal_of_more_than_outer_clothing" in raw:
+    case raw["removal_of_more_than_outer_clothing"].kind:
+    of JBool:
+      v.removal_of_more_than_outer_clothing = some(raw["removal_of_more_than_outer_clothing"].bval)
+    of JNull:
+      v.removal_of_more_than_outer_clothing = none(bool)
+    else:
+      raise newException(ValueError, "invalid type for 'removal_of_more_than_outer_clothing' field")
 
 let client = newHttpClient()
 client.headers["User-Agent"] = "ukpolice/0.1.0 (Nim)"
@@ -311,3 +384,20 @@ proc get_policing_team_for_area*(lat, lng: string): PolicingTeam =
   let coordsParam = lat & "," & lng
   let resp = client.getContent(BaseUrl & "locate-neighbourhood?q=" & coordsParam)
   resp.fromJson(PolicingTeam)
+
+proc get_street_stop_and_searches(url: string): seq[StopAndSearch] =
+  let resp = client.getContent(url)
+  resp.fromJson(seq[StopAndSearch])
+
+proc get_street_stop_and_searches_by_coords*(lat, lng: string, date = ""): seq[StopAndSearch] =
+  var url = BaseUrl & "stops-street?lat=" & lat & "&lng=" & lng
+  if date != "":
+    url &= "&date=" & date
+  get_street_stop_and_searches(url)
+
+proc get_street_stop_and_searches_by_polygon*(poly: seq[(string, string)], date = ""): seq[StopAndSearch] =
+  let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
+  var url = BaseUrl & "stops-street?poly=" & polyParam
+  if date != "":
+    url &= "&date=" & date
+  get_street_stop_and_searches(url)

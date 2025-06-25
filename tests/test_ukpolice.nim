@@ -40,7 +40,8 @@ test "get_street_crime_outcomes_by_coords(lat, lng, date)":
   check outcomes.len == 4
 
 test "get_street_crime_outcomes_by_polygon(poly, date)":
-  let outcomes = get_street_crime_outcomes_by_polygon(@[("52","0.5"),("52.794","0.4"),("52.1","0.5")], date="2024-01")
+  let outcomes = get_street_crime_outcomes_by_polygon(
+    @[("52","0.5"),("52.794","0.4"),("52.1","0.5")], date="2024-01")
   check outcomes.len == 9
 
 test "get_crimes_by_location_id(location_id, date)":
@@ -95,3 +96,12 @@ test "get_policing_team_for_area(lat, lng)":
   let team = get_policing_team_for_area("51.500617", "-0.124629")
   check team.force == "metropolitan"
   check team.neighbourhood == "E05013806N"
+
+test "get_street_stop_and_searches_by_coords(lat, lng, date)":
+  let stop_and_searches = get_street_stop_and_searches_by_coords("52.001", "-1.001", "2024-01")
+  check stop_and_searches.len == 2
+
+test "get_street_stop_and_searches_by_polygon(poly, date)":
+  let stop_and_searches = get_street_stop_and_searches_by_polygon(
+    @[("52","0.5"),("52.794","0.4"),("52.1","0.5")], "2024-01")
+  check stop_and_searches.len == 3
