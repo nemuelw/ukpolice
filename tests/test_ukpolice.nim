@@ -90,3 +90,8 @@ test "get_neighbourhood_events(force_id, neighbourhood_id)":
 test "get_neighbourhood_priorities(force_id, neighbourhood_id)":
   let priorities = get_neighbourhood_priorities("leicestershire", "NC04")
   check priorities.len >= 0
+
+test "get_policing_team_for_area(lat, lng)":
+  let team = get_policing_team_for_area("51.500617", "-0.124629")
+  check team.force == "metropolitan"
+  check team.neighbourhood == "E05013806N"

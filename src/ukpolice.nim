@@ -165,6 +165,10 @@ type
     action*: string
     action_date*: string
 
+  PolicingTeam* = object
+    force*: string
+    neighbourhood*: string
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -302,3 +306,8 @@ proc get_neighbourhood_events*(force_id: string, neighbourhood_id: string): seq[
 proc get_neighbourhood_priorities*(force_id: string, neighbourhood_id: string): seq[Priority] =
   let resp = client.getContent(BaseUrl & force_id & "/" & neighbourhood_id & "/priorities")
   resp.fromJson(seq[Priority])
+
+proc get_policing_team_for_area*(lat, lng: string): PolicingTeam =
+  let coordsParam = lat & "," & lng
+  let resp = client.getContent(BaseUrl & "locate-neighbourhood?q=" & coordsParam)
+  resp.fromJson(PolicingTeam)
