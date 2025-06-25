@@ -132,7 +132,7 @@ proc get_street_crimes(url: string): seq[CrimeRecord] =
   let resp = client.getContent(url)
   resp.fromJson(seq[CrimeRecord])
 
-proc get_street_crimes_by_location*(lat, lng: string, category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
+proc get_street_crimes_by_coords*(lat, lng: string, category: string = "all-crime", date: string = ""): seq[CrimeRecord] =
   var url = BaseUrl & "crimes-street/" & category & "?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
@@ -150,13 +150,13 @@ proc get_street_crime_outcomes(url: string): seq[CrimeOutcome] =
   resp.fromJson(seq[CrimeOutcome])
 
 proc get_street_crime_outcomes_by_location_id*(location_id: string, date: string = ""): seq[CrimeOutcome] =
-  var url = BaseUrl & "outcomes-at-location?" & "location_id=" & location_id
+  var url = BaseUrl & "outcomes-at-location?location_id=" & location_id
   if date != "":
     url &= "&date=" & date
   get_street_crime_outcomes(url)
 
-proc get_street_crime_outcomes_by_location*(lat, lng: string, date: string = ""): seq[CrimeOutcome] =
-  var url = BaseUrl & "outcomes-at-location?lat=" & lat & "&lng=" & lng
+proc get_street_crime_outcomes_by_coords*(lat, lng: string, date: string = ""): seq[CrimeOutcome] =
+  var url = BaseUrl & "ou_by_locatcomes-at-location?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
   get_street_crime_outcomes(url)
@@ -168,6 +168,24 @@ proc get_street_crime_outcomes_by_polygon*(poly: seq[(string, string)], date: st
     url &= "&date=" & date
   get_street_crime_outcomes(url)
 
+proc get_crimes_at_location(url: string): seq[CrimeRecord] =
+  let resp = client.getContent(url)
+  resp.fromJson(seq[CrimeRecord])
+
+proc get_crimes_by_location_id*(location_id: string, date: string = ""): seq[CrimeRecord] =
+  var url = BaseUrl & "crimes-at-location?location_id=" & location_id
+  if date != "":
+    url &= "&date=" & date
+  get_crimes_at_location(url)
+
+proc get_crimes_by_coords*(lat, lng: string, date: string = ""): seq[CrimeRecord] =
+  var url = BaseUrl & "crimes-at-location?lat=" & lat & "&lng=" & lng
+  if date != "":
+    url &= "&date=" & date
+  get_crimes_at_location(url)
+
 proc get_crime_categories*(date: string): seq[CrimeCategory] =
   let resp = client.getContent(BaseUrl & "crime-categories" & "?date=" & date)
   resp.fromJson(seq[CrimeCategory])
+
+
