@@ -99,6 +99,9 @@ type
     person_id*: string
     crime*: Crime
 
+  LastUpdated* = object
+    date*: string
+
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
 
@@ -194,3 +197,7 @@ proc get_crimes_with_no_location*(force: string, category = "all-crime", date = 
 proc get_crime_categories*(date: string): seq[CrimeCategory] =
   let resp = client.getContent(BaseUrl & "crime-categories" & "?date=" & date)
   resp.fromJson(seq[CrimeCategory])
+
+proc get_crime_last_updated*(): LastUpdated =
+  let resp = client.getContent(BaseUrl & "crime-last-updated")
+  resp.fromJson(LastUpdated)

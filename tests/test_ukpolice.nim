@@ -54,3 +54,7 @@ test "get_crimes_by_coords(lat, lng, date)":
 test "get_crimes_with_no_location(force, category, date)":
   let crimes = get_crimes_with_no_location("leicestershire", "burglary", "2024-01")
   check crimes.len == 19
+
+test "get_crime_last_updated()":
+  let last_updated = get_crime_last_updated()
+  check last_updated.date.len > 0
