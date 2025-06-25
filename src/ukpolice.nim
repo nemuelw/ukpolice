@@ -48,7 +48,11 @@ type
     name*: string
     rank*: string
     bio*: string
-    contact_details: ContactDetails 
+    contact_details: ContactDetails
+
+  CrimeCategory* = object
+    url*: string
+    name*: string
 
 proc renameHook(c: var CrimeDate, fieldName: var string) =
   if fieldName == "stop-and-search": fieldName = "stop_and_search"
@@ -78,3 +82,7 @@ proc get_force_details*(force_id: string): ForceDetails =
 proc get_senior_officers*(force_id: string): seq[SeniorOfficer] =
   let resp = client.getContent(BaseUrl & "forces" & "/" & force_id & "/people")
   resp.fromJson(seq[SeniorOfficer])
+
+proc get_crime_categories*(date: string): seq[CrimeCategory] =
+  let resp = client.getContent(BaseUrl & "crime-categories" & "?date=" & date)
+  resp.fromJson(seq[CrimeCategory])

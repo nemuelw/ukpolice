@@ -18,3 +18,7 @@ test "get_force_details(force_id) returns correct force details":
 test "get_senior_officers(force_id) returns correct senior officers' details":
   let senior_officers = get_senior_officers("leicestershire")
   check senior_officers.len > 0
+
+test "get_crime_categories(date) returns valid data":
+  let crime_categories = get_crime_categories("2024-01")
+  check crime_categories.len == 15
