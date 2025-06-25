@@ -1,7 +1,18 @@
-# This is just an example to get you started. A typical library package
-# exports the main API in this file. Note that you cannot rename this file
-# but you can remove it if you wish.
+import httpclient, jsony
 
-proc add*(x, y: int): int =
-  ## Adds two numbers together.
-  return x + y
+const BaseUrl = "https://data.police.uk/api/"
+
+type
+  CrimeDate* = object
+    date: string
+    stop_and_search: seq[string]
+
+proc renameHook(c: var CrimeDate, fieldName: var string) =
+  if fieldName == "stop-and-search": fieldName = "stop_and_search"
+
+let client = newHttpClient()
+client.headers["User-Agent"] = "ukpolice/0.1.0 (Nim)"
+
+proc get_available_crime_dates*(): seq[CrimeDate] =
+  let resp = client.getContent(BaseUrl & "crimes-street-dates")
+  resp.fromJson(seq[CrimeDate])

@@ -10,3 +10,4 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.6"
+requires "jsony >= 1.1.5"
