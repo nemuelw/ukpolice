@@ -97,11 +97,19 @@ test "get_policing_team_for_area(lat, lng)":
   check team.force == "metropolitan"
   check team.neighbourhood == "E05013806N"
 
-test "get_street_stop_and_searches_by_coords(lat, lng, date)":
-  let stop_and_searches = get_street_stop_and_searches_by_coords("52.001", "-1.001", "2024-01")
-  check stop_and_searches.len == 2
+test "get_street_stops_and_searches_by_coords(lat, lng, date)":
+  let stops_and_searches = get_street_stops_and_searches_by_coords("52.001", "-1.001", "2024-01")
+  check stops_and_searches.len == 2
 
-test "get_street_stop_and_searches_by_polygon(poly, date)":
-  let stop_and_searches = get_street_stop_and_searches_by_polygon(
+test "get_street_stops_and_searches_by_polygon(poly, date)":
+  let stops_and_searches = get_street_stops_and_searches_by_polygon(
     @[("52","0.5"),("52.794","0.4"),("52.1","0.5")], "2024-01")
-  check stop_and_searches.len == 3
+  check stops_and_searches.len == 3
+
+test "get_stops_and_searches_by_location_id(location_id, date)":
+  let stops_and_searches = get_stops_and_searches_by_location_id("1609590", "2024-01")
+  check stops_and_searches.len == 2
+
+test "get_stops_and_searches_with_no_location(force_id, date)":
+  let stops_and_searches = get_stops_and_searches_with_no_location("leicestershire", "2024-01")
+  check stops_and_searches.len == 33

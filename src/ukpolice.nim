@@ -179,7 +179,7 @@ type
     datetime*: string
     operation*: string
     operation_name*: string
-    location*: Location
+    location*: Option[Location]
     gender*: string
     age_range*: string
     self_defined_ethnicity*: string
@@ -215,13 +215,12 @@ proc parseHook(s: string, i: var int, v: var StopAndSearch) =
   var raw: JsonNode
   parseHook(s, i, raw)
 
-  # Parse all fields manually
+  # parse all fields manually
   v.stop_and_search_type = raw["type"].str
   v.involved_person = raw["involved_person"].bval
   v.datetime = raw["datetime"].str
   v.operation = if "operation" in raw: raw["operation"].getStr else: ""
   v.operation_name = if "operation_name" in raw: raw["operation_name"].getStr else: ""
-  v.location = raw["location"].to(Location)
   v.gender = raw["gender"].getStr
   v.age_range = raw["age_range"].getStr
   v.self_defined_ethnicity = raw["self_defined_ethnicity"].getStr
@@ -230,37 +229,41 @@ proc parseHook(s: string, i: var int, v: var StopAndSearch) =
   v.object_of_search = raw["object_of_search"].getStr
   v.outcome_object = raw["outcome_object"].to(OutcomeObject)
 
-  # Custom outcome field parsing
-  if "outcome" in raw:
-    let outcomeNode = raw["outcome"]
-    case outcomeNode.kind
-    of JBool:
-      if outcomeNode.bval:
-        v.outcome = "true"
-      else:
-        v.outcome = "false"
-    of JString:
-      v.outcome = outcomeNode.str
-    else:
-      raise newException(ValueError, "invalid type for 'outcome' field")
+  case raw["location"].kind:
+  of JObject:
+    v.location = some(raw["location"].to(Location))
+  of JNull:
+    v.location = none(Location)
+  else:
+    raise newException(ValueError, "invalid type for 'location' field")
 
-  if "outcome_linked_to_object_of_search" in raw:
-    case raw["outcome_linked_to_object_of_search"].kind:
-    of JBool:
-      v.outcome_linked_to_object_of_search = some(raw["outcome_linked_to_object_of_search"].bval)
-    of JNull:
-      v.outcome_linked_to_object_of_search = none(bool)
+  let outcomeNode = raw["outcome"]
+  case outcomeNode.kind
+  of JBool:
+    if outcomeNode.bval:
+      v.outcome = "true"
     else:
-      raise newException(ValueError, "invalid type for 'outcome_linked_to_object_of_search' field")
+      v.outcome = "false"
+  of JString:
+    v.outcome = outcomeNode.str
+  else:
+    raise newException(ValueError, "invalid type for 'outcome' field")
 
-  if "removal_of_more_than_outer_clothing" in raw:
-    case raw["removal_of_more_than_outer_clothing"].kind:
-    of JBool:
-      v.removal_of_more_than_outer_clothing = some(raw["removal_of_more_than_outer_clothing"].bval)
-    of JNull:
-      v.removal_of_more_than_outer_clothing = none(bool)
-    else:
-      raise newException(ValueError, "invalid type for 'removal_of_more_than_outer_clothing' field")
+  case raw["outcome_linked_to_object_of_search"].kind:
+  of JBool:
+    v.outcome_linked_to_object_of_search = some(raw["outcome_linked_to_object_of_search"].bval)
+  of JNull:
+    v.outcome_linked_to_object_of_search = none(bool)
+  else:
+    raise newException(ValueError, "invalid type for 'outcome_linked_to_object_of_search' field")
+
+  case raw["removal_of_more_than_outer_clothing"].kind:
+  of JBool:
+    v.removal_of_more_than_outer_clothing = some(raw["removal_of_more_than_outer_clothing"].bval)
+  of JNull:
+    v.removal_of_more_than_outer_clothing = none(bool)
+  else:
+    raise newException(ValueError, "invalid type for 'removal_of_more_than_outer_clothing' field")
 
 let client = newHttpClient()
 client.headers["User-Agent"] = "ukpolice/0.1.0 (Nim)"
@@ -385,19 +388,31 @@ proc get_policing_team_for_area*(lat, lng: string): PolicingTeam =
   let resp = client.getContent(BaseUrl & "locate-neighbourhood?q=" & coordsParam)
   resp.fromJson(PolicingTeam)
 
-proc get_street_stop_and_searches(url: string): seq[StopAndSearch] =
+proc get_stops_and_searches(url: string): seq[StopAndSearch] =
   let resp = client.getContent(url)
   resp.fromJson(seq[StopAndSearch])
 
-proc get_street_stop_and_searches_by_coords*(lat, lng: string, date = ""): seq[StopAndSearch] =
+proc get_street_stops_and_searches_by_coords*(lat, lng: string, date = ""): seq[StopAndSearch] =
   var url = BaseUrl & "stops-street?lat=" & lat & "&lng=" & lng
   if date != "":
     url &= "&date=" & date
-  get_street_stop_and_searches(url)
+  get_stops_and_searches(url)
 
-proc get_street_stop_and_searches_by_polygon*(poly: seq[(string, string)], date = ""): seq[StopAndSearch] =
+proc get_street_stops_and_searches_by_polygon*(poly: seq[(string, string)], date = ""): seq[StopAndSearch] =
   let polyParam = poly.mapIt(it[0] & "," & it[1]).join(":")
   var url = BaseUrl & "stops-street?poly=" & polyParam
   if date != "":
     url &= "&date=" & date
-  get_street_stop_and_searches(url)
+  get_stops_and_searches(url)
+
+proc get_stops_and_searches_by_location_id*(location_id: string, date: string = ""): seq[StopAndSearch] =
+  var url = BaseUrl & "stops-at-location?location_id=" & location_id
+  if date != "":
+    url &= "&date=" & date
+  get_stops_and_searches(url)
+
+proc get_stops_and_searches_with_no_location*(force_id: string, date = ""): seq[StopAndSearch] =
+  var url = BaseUrl & "stops-no-location?force=" & force_id
+  if date != "":
+    url &= "&date=" & date
+  get_stops_and_searches(url)
